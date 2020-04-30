@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{% block login %}{% endblock %}
+{% block logout %}{% endblock %}
+{% block password_reset %}{% endblock %}
+{% block content %}{% endblock %}
+<ul class="sidebar-nav">
+   {% if user.is_authenticated %}
+     <li>User: {{ user.get_username }}</li>
+     <li><a href="{% url 'logout'%}?next={{request.path}}">Выйти</a></li>
+   {% elif request.path == '/accounts/login/' %}
+    {% else %}
+     <li><a href="{% url 'login'%}?next={{request.path}}">Войти</a></li>
+   {% endif %}
+  </ul>
+
+</body>
+</html>
