@@ -4,6 +4,9 @@ from django.contrib.auth import login, authenticate, logout, views as auth_views
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 
+from .forms import UploadFileForm
+from .models import CallReport
+
 
 @login_required()
 def home(request):
@@ -24,3 +27,14 @@ def sign_up(request):
         form = UserCreationForm()
     return render(request, 'registration/sign_up.html', {'form': form})
 
+
+@login_required()
+def create_report(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            CallReport().pdf_to_db(request.FILES['file'], request.user)
+            return render(request, 'report/creation.html', {'success': True})
+    else:
+        form = UploadFileForm()
+    return render(request, 'report/creation.html', {'form': form})
