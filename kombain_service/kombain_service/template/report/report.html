@@ -7,12 +7,31 @@
 {% else %}
 <h3>Отчет № {{ report }}</h3>
 
+<!--<p><a href="/{{request.user.username}}/report/{{report.id}}"> Отчет {{forloop.counter}}</a> от {{ report.call_report_created }}</p>-->
+Выбрать дату начала проверки
+<form>
+            <p>
+                <label for="date_start">Дата начала проверки: </label>
+                <input type="date" id="date_start" name="date_start"/>
+            </p>
+    <p>
+                <label for="date_end">Дата окончания проверки: </label>
+                <input type="date" id="date_end" name="date_end"/>
+            </p>
+            <p>
+                <button type="submit">Отправить</button>
+            </p>
+        </form>
+
 Интернет трафика - {{ internet }} Мбайт
 
 <p>Номер телефона - секунд проговорил в данный период</p>
-
-{% for call in calls %}
-    <p>{{forloop.counter}}. {{ call.traffic_place }} - {{ call.total_sec }} секунд</p>
-{% endfor %}
+    {% if calls %}
+        {% for call in calls %}
+            <p>{{forloop.counter}}. {{ call.traffic_place }} - {{ call.total_sec }} секунд</p>
+        {% endfor %}
+    {% else %}
+        <h3>Данные не найдены, измените даты проверки</h3>
+    {% endif %}
 {% endif %}
 {% endblock %}

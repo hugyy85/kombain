@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, User
 from django.contrib.auth import login, authenticate, logout, views as auth_views
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 
@@ -51,10 +51,17 @@ def listing_reports(request):
 def show_report(request, report_id, username):
     if username == request.user.username:
         report = CallReportTraffic.objects.filter(call_report_id=report_id)
-        internet_traffic = report.aggregate(Sum('traffic_int_volume'))['traffic_int_volume__sum'] // 1024  # in Mbytes
-        calls = report.values('traffic_place')\
-            .annotate(total_sec=Sum('traffic_sec_volume'))\
-            .order_by('-total_sec')
+        date_start = request.GET['date_start'] or report.order_by('date_time')[0].date_time
+        date_end = request.GET['date_end'] or report.order_by('date_time').reverse()[0].date_time
+        report = report.filter(date_time__lte=date_end, date_time__gte=date_start)
+        if report.exists():
+            internet_traffic = report.aggregate(Sum('traffic_int_volume'))['traffic_int_volume__sum'] // 1024  # in Mbytes
+            calls = report.values('traffic_place')\
+                .annotate(total_sec=Sum('traffic_sec_volume'))\
+                .order_by('-total_sec')
+        else:
+            internet_traffic = None
+            calls = None
         context = {
             'internet': internet_traffic,
             'calls': calls,
