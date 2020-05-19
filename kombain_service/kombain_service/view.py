@@ -3,9 +3,10 @@ from django.contrib.auth.forms import UserCreationForm, User
 from django.contrib.auth import login, authenticate, logout, views as auth_views
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
 
 from .forms import UploadFileForm
-from .models import CallReport
+from .models import CallReport, CallReportTraffic
 
 
 @login_required()
@@ -34,7 +35,32 @@ def create_report(request):
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             CallReport().pdf_to_db(request.FILES['file'], request.user)
-            return render(request, 'report/creation.html', {'success': True})
+            return redirect('/listing')
     else:
         form = UploadFileForm()
     return render(request, 'report/creation.html', {'form': form})
+
+
+@login_required()
+def listing_reports(request):
+    reports = CallReport.objects.filter(user_id=request.user.id)
+    return render(request, 'report/listing.html', {'reports': reports})
+
+
+@login_required()
+def show_report(request, report_id, username):
+    if username == request.user.username:
+        report = CallReportTraffic.objects.filter(call_report_id=report_id)
+        internet_traffic = report.aggregate(Sum('traffic_int_volume'))['traffic_int_volume__sum'] // 1024  # in Mbytes
+        calls = report.values('traffic_place')\
+            .annotate(total_sec=Sum('traffic_sec_volume'))\
+            .order_by('-total_sec')
+        context = {
+            'internet': internet_traffic,
+            'calls': calls,
+            'report': report_id
+        }
+    else:
+        context = {'error': 'Доступ закрыт'}
+
+    return render(request, 'report/report.html', context)

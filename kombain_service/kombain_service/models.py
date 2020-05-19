@@ -10,19 +10,13 @@ class CallReport(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     call_report_created = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to='pdf')
-    r_date_time = models.DateTimeField()
-    r_traffic_place = models.CharField(max_length=64)
-    r_traffic_income = models.BooleanField(default=False)
-    r_traffic_name = models.CharField(max_length=32)
-    r_traffic_int_volume = models.IntegerField(null=True)
-    r_traffic_sec_volume = models.IntegerField(null=True)
-    r_traffic_other_volume = models.IntegerField(null=True)
 
     def pdf_to_db(self, pdf_path, user):
         # pdf converter is so bad, because pfd is image, not table
         data_frame = tabula.read_pdf(pdf_path, output_format="dataframe", pages='all')
         count_str = data_frame[0].shape[0]
         result = []
+        report = CallReport.objects.create(user=user, file=pdf_path)
         for i in range(count_str):
             try:
 
@@ -34,6 +28,7 @@ class CallReport(models.Model):
 
                 if str(raw_str['Номер']).startswith('<--'):
                     income = True
+                    raw_str['Номер'] = raw_str['Номер'].replace('<--', '')
                 else:
                     income = False
                 number = raw_str['Номер']
@@ -49,18 +44,29 @@ class CallReport(models.Model):
                     calls = int(calls[0]) * 60 + int(calls[1])
                 else:
                     other = int(traffic_volume)
-                result.append(CallReport(
-                    user=user,
-                    file=pdf_path,
-                    r_date_time=date_time,
-                    r_traffic_place=number,
-                    r_traffic_name=traffic_name,
-                    r_traffic_int_volume=internet,
-                    r_traffic_sec_volume=calls,
-                    r_traffic_other_volume=other,
-                    r_traffic_income=income
+                result.append(CallReportTraffic(
+                    call_report_id=report,
+                    date_time=date_time,
+                    traffic_place=number,
+                    traffic_name=traffic_name,
+                    traffic_int_volume=internet,
+                    traffic_sec_volume=calls,
+                    traffic_other_volume=other,
+                    traffic_income=income
                 ))
             except:
                 pass
-        CallReport.objects.bulk_create(result)
+
+        CallReportTraffic.objects.bulk_create(result)
+
+
+class CallReportTraffic(models.Model):
+    call_report_id = models.ForeignKey(CallReport, on_delete=models.CASCADE)
+    date_time = models.DateTimeField()
+    traffic_place = models.CharField(max_length=64)
+    traffic_income = models.BooleanField(default=False)
+    traffic_name = models.CharField(max_length=32)
+    traffic_int_volume = models.IntegerField(null=True)
+    traffic_sec_volume = models.IntegerField(null=True)
+    traffic_other_volume = models.IntegerField(null=True)
 

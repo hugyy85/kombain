@@ -2,7 +2,7 @@
 
 {% block content %}
 {% if success %}
-Congratulations! you won!
+Ваш отчет обработан, чтобы посмотреть ваши отчеты перейдите <a href="/listing/">по ссылке</a>
 {% else %}
 
 <form action="{% url 'creation' %}" method="post" enctype="multipart/form-data">
