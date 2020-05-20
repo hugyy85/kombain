@@ -51,8 +51,8 @@ def listing_reports(request):
 def show_report(request, report_id, username):
     if username == request.user.username:
         report = CallReportTraffic.objects.filter(call_report_id=report_id)
-        date_start = request.GET['date_start'] or report.order_by('date_time')[0].date_time
-        date_end = request.GET['date_end'] or report.order_by('date_time').reverse()[0].date_time
+        date_start = request.GET.get('date_start') or report.order_by('date_time')[0].date_time
+        date_end = request.GET.get('date_end') or report.order_by('date_time').reverse()[0].date_time
         report = report.filter(date_time__lte=date_end, date_time__gte=date_start)
         if report.exists():
             internet_traffic = report.aggregate(Sum('traffic_int_volume'))['traffic_int_volume__sum'] // 1024  # in Mbytes

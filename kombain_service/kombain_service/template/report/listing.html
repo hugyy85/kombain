@@ -2,7 +2,7 @@
 
 {% block content %}
 
-Отчеты данного юзера
+Отчеты {{request.user.username}}
 {% for report in reports %}
 
 <p><a href="/{{request.user.username}}/report/{{report.id}}"> Отчет {{forloop.counter}}</a> от {{ report.call_report_created }}</p>

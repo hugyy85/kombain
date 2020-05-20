@@ -25,7 +25,7 @@ urlpatterns = [
     path('sign_up/', sign_up, name='sign_up'),
     path('create_report/', create_report, name='creation'),
     path('', home),
-    path('listing/', listing_reports),
+    path('listing/', listing_reports, name='listing'),
     path('<username>/report/<int:report_id>/', show_report),
 ]
 
