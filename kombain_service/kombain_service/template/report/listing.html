@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+Отчеты данного юзера
+{% for report in reports %}
+
+<p><a href="/{{request.user.username}}/report/{{report.id}}"> Отчет {{forloop.counter}}</a> от {{ report.call_report_created }}</p>
+{% endfor%}
+
+{% endblock %}
