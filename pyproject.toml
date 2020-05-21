@@ -9,6 +9,8 @@ python = "^3.7"
 django = "^3.0.5"
 "pdfminer.six" = "^20200402"
 tabula-py = "^2.1.0"
+BeautifulSoup4 = "^4.9.1"
+lxml = "^4.5.1"
 
 
 [tool.poetry.dev-dependencies]

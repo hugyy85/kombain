@@ -34,7 +34,13 @@ def create_report(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
-            CallReport().pdf_to_db(request.FILES['file'], request.user)
+            file_name = (request.FILES['file'].name.lower())
+            if file_name.endswith('html'):
+                CallReport().html_to_db(request.FILES['file'], request.user)
+            elif file_name.endswith('pdf'):
+                CallReport().pdf_to_db(request.FILES['file'], request.user)
+            else:
+                raise RuntimeError()
             return redirect('/listing')
     else:
         form = UploadFileForm()
@@ -51,6 +57,9 @@ def listing_reports(request):
 def show_report(request, report_id, username):
     if username == request.user.username:
         report = CallReportTraffic.objects.filter(call_report_id=report_id)
+        if not report.exists():
+            return render(request, 'report/report.html', {'error': 'Данные отчета не загрузились в базу данных, '
+                                                                   'попробуйте создать новый отчет'})
         date_start = request.GET.get('date_start') or report.order_by('date_time')[0].date_time
         date_end = request.GET.get('date_end') or report.order_by('date_time').reverse()[0].date_time
         report = report.filter(date_time__lte=date_end, date_time__gte=date_start)

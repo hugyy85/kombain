@@ -1,15 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% if success %}
-Ваш отчет обработан, чтобы посмотреть ваши отчеты перейдите <a href="/listing/">по ссылке</a>
-{% else %}
-
 <form action="{% url 'creation' %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <p>{{ form.as_p }}</p>
-            <p><input type="submit" value="Upload" /></p>
+            <p><input type="submit" value="Загрузить" /></p>
         </form>
 
-{% endif %}
 {% endblock %}
